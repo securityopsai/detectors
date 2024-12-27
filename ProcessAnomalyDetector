@@ -1,0 +1,139 @@
+import psutil
+import os
+import datetime
+import json
+from sklearn.ensemble import IsolationForest
+import numpy as np
+import pefile
+
+# Paths for baseline and logs
+BASELINE_FILE = "process_baseline.json"
+LOG_FILE = "enhanced_process_monitor_log.txt"
+
+# Cooldown and Whitelist
+flagged_cache = {}
+COOLDOWN = 60
+WHITELIST = ['explorer.exe', 'svchost.exe', 'chrome.exe']
+
+# Baseline data
+baseline_data = {}
+
+# Suspicious directories
+SUSPICIOUS_DIRECTORIES = ['TEMP', 'APPDATA', 'Downloads']
+
+# Load or initialize baseline
+def load_baseline():
+    global baseline_data
+    if os.path.exists(BASELINE_FILE):
+        with open(BASELINE_FILE, "r") as file:
+            baseline_data = json.load(file)
+    else:
+        baseline_data = {}
+
+def save_baseline():
+    with open(BASELINE_FILE, "w") as file:
+        json.dump(baseline_data, file, indent=4)
+
+# Update the baseline with new data
+def update_baseline(name, cpu, memory, disk_io):
+    if name not in baseline_data:
+        baseline_data[name] = []
+    baseline_data[name].append([cpu, memory, disk_io])
+
+# Train a simple anomaly detection model
+def train_model():
+    data = []
+    for name, metrics in baseline_data.items():
+        data.extend(metrics)
+    return IsolationForest(contamination=0.05).fit(data) if data else None
+
+# Check if an executable is signed
+def is_signed(exe_path):
+    try:
+        pe = pefile.PE(exe_path)
+        if hasattr(pe, "VS_FIXEDFILEINFO"):
+            return True
+    except:
+        return False
+    return False
+
+# Log flagged processes
+def log_flagged_process(pid, severity, message):
+    current_time = datetime.datetime.now()
+    if pid in flagged_cache:
+        last_logged_time = flagged_cache[pid]
+        if (current_time - last_logged_time).seconds < COOLDOWN:
+            return
+    flagged_cache[pid] = current_time
+    with open(LOG_FILE, "a") as log_file:
+        timestamp = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        log_file.write(f"{timestamp} [{severity}] - {message}\n")
+        print(f"Logged: {message}")
+
+# Check if a directory is suspicious
+def is_suspicious_directory(path):
+    for directory in SUSPICIOUS_DIRECTORIES:
+        if directory in path.upper():
+            return True
+    return False
+
+# Monitor processes
+def monitor_processes(model):
+    for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info', 'io_counters', 'exe']):
+        try:
+            pid = proc.info['pid']
+            name = proc.info['name']
+            cpu = proc.info['cpu_percent']
+            memory = proc.info['memory_info'].rss
+            io_counters = proc.info.get('io_counters', None)
+            disk_io = io_counters.write_bytes if io_counters else 0
+            exe = proc.info['exe']
+
+            # Skip whitelisted processes
+            if name in WHITELIST:
+                continue
+
+            # Update baseline
+            update_baseline(name, cpu, memory, disk_io)
+
+            # Check for unsigned executables and suspicious directories
+            unsigned = exe and not is_signed(exe)
+            bad_dir = exe and is_suspicious_directory(exe)
+            has_network = False
+
+            # Check for network connections
+            for conn in psutil.net_connections(kind='inet'):
+                if conn.pid == pid and conn.status == 'ESTABLISHED':
+                    has_network = True
+                    break
+
+            # Apply logic based on conditions
+            if unsigned and bad_dir and has_network:
+                log_flagged_process(pid, "ALERT", f"Unsigned, shady directory, and network: {name} (PID {pid}), Path: {exe}")
+            elif unsigned and has_network:
+                log_flagged_process(pid, "WARNING", f"Unsigned with network: {name} (PID {pid}), Path: {exe}")
+            elif unsigned and bad_dir:
+                log_flagged_process(pid, "WARNING", f"Unsigned and suspicious directory: {name} (PID {pid}), Path: {exe}")
+            elif bad_dir:
+                log_flagged_process(pid, "INFO", f"Signed but suspicious directory: {name} (PID {pid}), Path: {exe}")
+
+            # Anomaly detection
+            features = np.array([[cpu, memory, disk_io]])
+            if model and model.predict(features)[0] == -1:
+                log_flagged_process(pid, "ALERT", f"Anomaly detected: {name} (PID {pid}) - CPU: {cpu}%, Memory: {memory / 1e6} MB, Disk IO: {disk_io / 1e6} MB")
+
+        except (psutil.AccessDenied, psutil.NoSuchProcess):
+            continue
+
+# Main program
+if __name__ == "__main__":
+    print("Starting process monitor with enhanced checks...")
+    load_baseline()
+    try:
+        while True:
+            model = train_model()
+            monitor_processes(model)
+            save_baseline()
+    except KeyboardInterrupt:
+        print("Exiting and saving baseline...")
+        save_baseline()
