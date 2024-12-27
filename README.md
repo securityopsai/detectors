@@ -99,7 +99,6 @@ View Logs
 
 Check the log file for flagged processes:
 
-[2024-12-27 14:05:12] [ALERT] - Unsigned, shady directory, and network: powershell.exe (PID 4567), Path: C:\Users\Peter\AppData\Local\Temp\malicious.exe
 
 Detection Criteria
 
