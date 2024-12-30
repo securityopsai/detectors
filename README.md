@@ -1,46 +1,40 @@
-# Windows Process Anomaly Detector (Testing Version)
+# Process Anomaly Detection Learning Project
 
-**IMPORTANT: This is a testing/experimental tool intended for research and learning purposes only. Do not use in production environments without thorough testing and validation.**
+**This is a LEARNING PROJECT designed to understand process monitoring, Python programming, and basic machine learning concepts. It is NOT intended for actual security monitoring or production use.**
 
-A Python-based security tool that uses machine learning and behavioral analysis to detect suspicious processes on Windows systems. This tool combines static rules, process relationship monitoring, and unsupervised machine learning to identify potentially malicious activity.
+## Learning Objectives
 
-## Testing Disclaimer
+This project helps understand:
+- How to interact with Windows processes using Python
+- Basic machine learning concepts with scikit-learn
+- Working with system metrics and logs
+- Python programming best practices
+- Basic security monitoring concepts
 
-This tool is:
-- **Experimental**: Under active development and testing
-- **Not Production Ready**: May generate false positives/negatives
-- **For Research**: Intended for security research and learning
-- **Resource Intensive**: May impact system performance during testing
-
-## Features
-
-### Machine Learning Detection
-- Uses Isolation Forest algorithm to detect anomalous process behavior
-- Builds and maintains a baseline of normal process metrics
-- Monitors CPU usage, memory consumption, and disk I/O patterns
-
-### Static Analysis
-- Detects unsigned executables
-- Monitors processes running from suspicious directories (TEMP, APPDATA, Downloads)
-- Tracks network connections and flags suspicious combinations
+## Project Components
 
 ### Process Monitoring
-- Real-time monitoring of all system processes
-- Tracks process resource usage
-- Monitors network connectivity per process
-- Built-in whitelist support for common system processes
+- Using psutil to access process information
+- Reading process metrics (CPU, memory, disk I/O)
+- Understanding process relationships
 
-### Alerting
-- Multiple severity levels (INFO, WARNING, ALERT)
-- Detailed logging with process information
-- Cooldown system to prevent alert spam
-- Configurable alert thresholds
+### Basic Machine Learning
+- Introduction to anomaly detection
+- Using Isolation Forest algorithm
+- Feature engineering with process data
+- Model training concepts
+
+### Python Programming
+- Object-oriented programming
+- File I/O operations
+- Configuration management
+- Logging and error handling
 
 ## Requirements
 
 - Python 3.8+
 - Windows Operating System
-- Required Python packages:
+- Python packages:
   ```
   psutil
   scikit-learn
@@ -49,7 +43,7 @@ This tool is:
   pyyaml
   ```
 
-## Installation
+## Setup
 
 1. Clone the repository:
    ```bash
@@ -62,80 +56,50 @@ This tool is:
    pip install -r requirements.txt
    ```
 
-## Usage
+## Project Structure
 
-Run the detector:
-```bash
-python ProcessAnomalyDetector
-```
+- `ProcessAnomalyDetector` - Main Python script
+- `config.yaml` - Configuration settings
+- `requirements.txt` - Required Python packages
 
-The tool will:
-1. Load configuration from config.yaml
-2. Start monitoring processes in real-time
-3. Generate alerts for suspicious activity
-4. Log findings to rotating log files
+## Key Learning Points
 
-## Configuration
+1. **Process Information**
+   - How to access process details
+   - Understanding process metrics
+   - Process relationship concepts
 
-All configuration is now in `config.yaml`. You can modify:
-- Whitelisted processes
-- Suspicious directories
-- Alert thresholds
-- Command line patterns
-- Suspicious network ports
+2. **Machine Learning Basics**
+   - What is anomaly detection
+   - How Isolation Forest works
+   - Feature selection and engineering
 
-## Alert Severity Levels
-
-- **INFO**: Minor concerns (e.g., signed executable in suspicious directory)
-- **WARNING**: Moderate concerns (e.g., unsigned executable or suspicious command line)
-- **ALERT**: Major concerns (multiple suspicious indicators or severe anomalies)
-
-## Testing Notes
-
-1. **System Impact**
-   - Monitor CPU and memory usage during testing
-   - Adjust model_retrain_interval in config if needed
-   - Consider system load when testing
-
-2. **False Positives**
-   - Expect initial false positives while baseline is built
-   - Tune thresholds in config.yaml as needed
-   - Use whitelist for known-good processes
-
-3. **Testing Environment**
-   - Test in isolated/development environment first
-   - Back up any important data before testing
-   - Monitor system performance during testing
-
-## Known Limitations
-
-- May generate false positives during initial learning period
-- Resource intensive during model training
-- Limited to Windows operating systems
-- Requires administrative privileges
-- Experimental machine learning implementation
+3. **Python Skills**
+   - Working with classes
+   - File operations
+   - Error handling
+   - Configuration management
 
 ## Contributing
 
-Contributions are welcome! Areas for improvement:
-- Process injection detection
-- Memory analysis capabilities
-- Additional ML features
-- Testing and validation
-- Performance optimization
+This is a learning project - feel free to:
+- Experiment with the code
+- Add new features
+- Improve documentation
+- Share your learning
 
-## Security Notes
+## Educational Purpose
 
-- This is a testing tool - use with caution
-- Requires administrative privileges
-- Keep baseline data secure
-- Monitor resource usage
-- Verify results independently
+This project is designed for:
+- Learning Python programming
+- Understanding basic security concepts
+- Experimenting with machine learning
+- Practicing system monitoring
 
 ## License
 
-MIT License - Feel free to use and modify for your needs
+MIT License - Free to use for learning and experimentation
 
-## Disclaimer
+## Important Note
 
-This software is provided for educational and research purposes only. The authors are not responsible for any damage or misuse of this tool. Always obtain proper authorization before monitoring systems and respect all applicable laws and regulations.
+This is purely an educational project for learning purposes. It should not be used for actual security monitoring or in any production environment. The code is meant to demonstrate concepts and may not follow security best practices.
