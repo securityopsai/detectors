@@ -1,0 +1,35 @@
+# Process Anomaly Detector Configuration
+
+WHITELIST:
+  - explorer.exe
+  - svchost.exe
+  - chrome.exe
+
+SUSPICIOUS_DIRECTORIES:
+  - TEMP
+  - APPDATA
+  - Downloads
+
+THRESHOLDS:
+  cpu_threshold: 90
+  memory_threshold: 85
+  cooldown: 60
+  model_retrain_interval: 10  # Retrain model every N iterations
+
+SUSPICIOUS_PATTERNS:
+  command_line:
+    - pattern: "powershell -enc"
+      description: "Encoded PowerShell command"
+    - pattern: "downloadstring"
+      description: "Web download activity"
+    - pattern: "-w hidden"
+      description: "Hidden window"
+    - pattern: "bypass"
+      description: "Security bypass attempt"
+
+  network:
+    suspicious_ports:
+      - 4444
+      - 666
+      - 1337
+      - 31337
