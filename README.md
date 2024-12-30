@@ -1,6 +1,16 @@
-# Windows Process Anomaly Detector
+# Windows Process Anomaly Detector (Testing Version)
+
+**IMPORTANT: This is a testing/experimental tool intended for research and learning purposes only. Do not use in production environments without thorough testing and validation.**
 
 A Python-based security tool that uses machine learning and behavioral analysis to detect suspicious processes on Windows systems. This tool combines static rules, process relationship monitoring, and unsupervised machine learning to identify potentially malicious activity.
+
+## Testing Disclaimer
+
+This tool is:
+- **Experimental**: Under active development and testing
+- **Not Production Ready**: May generate false positives/negatives
+- **For Research**: Intended for security research and learning
+- **Resource Intensive**: May impact system performance during testing
 
 ## Features
 
@@ -36,6 +46,7 @@ A Python-based security tool that uses machine learning and behavioral analysis 
   scikit-learn
   numpy
   pefile
+  pyyaml
   ```
 
 ## Installation
@@ -59,66 +70,50 @@ python ProcessAnomalyDetector
 ```
 
 The tool will:
-1. Load or create a baseline of normal process behavior
+1. Load configuration from config.yaml
 2. Start monitoring processes in real-time
 3. Generate alerts for suspicious activity
-4. Log findings to `enhanced_process_monitor_log.txt`
+4. Log findings to rotating log files
 
 ## Configuration
 
-### Whitelist
-Edit the WHITELIST variable to add trusted processes:
-```python
-WHITELIST = ['explorer.exe', 'svchost.exe', 'chrome.exe']
-```
-
-### Suspicious Directories
-Modify SUSPICIOUS_DIRECTORIES to adjust monitored locations:
-```python
-SUSPICIOUS_DIRECTORIES = ['TEMP', 'APPDATA', 'Downloads']
-```
-
-### Alert Cooldown
-Adjust the COOLDOWN value (in seconds) to control alert frequency:
-```python
-COOLDOWN = 60  # Seconds between repeated alerts for the same process
-```
+All configuration is now in `config.yaml`. You can modify:
+- Whitelisted processes
+- Suspicious directories
+- Alert thresholds
+- Command line patterns
+- Suspicious network ports
 
 ## Alert Severity Levels
 
 - **INFO**: Minor concerns (e.g., signed executable in suspicious directory)
-- **WARNING**: Moderate concerns (e.g., unsigned executable or suspicious parent-child relationship)
+- **WARNING**: Moderate concerns (e.g., unsigned executable or suspicious command line)
 - **ALERT**: Major concerns (multiple suspicious indicators or severe anomalies)
 
-## Logging
+## Testing Notes
 
-The tool logs all findings to `enhanced_process_monitor_log.txt` with the following format:
-```
-YYYY-MM-DD HH:MM:SS [SEVERITY] - Message
-```
+1. **System Impact**
+   - Monitor CPU and memory usage during testing
+   - Adjust model_retrain_interval in config if needed
+   - Consider system load when testing
 
-Example:
-```
-2024-12-30 10:15:23 [ALERT] - Unsigned, shady directory, and network: suspicious.exe (PID 1234), Path: C:\Users\...\AppData\Local\Temp\suspicious.exe
-```
+2. **False Positives**
+   - Expect initial false positives while baseline is built
+   - Tune thresholds in config.yaml as needed
+   - Use whitelist for known-good processes
 
-## How It Works
+3. **Testing Environment**
+   - Test in isolated/development environment first
+   - Back up any important data before testing
+   - Monitor system performance during testing
 
-1. **Baseline Creation**
-   - Collects metrics from running processes
-   - Builds a statistical model of normal behavior
-   - Continuously updates baseline data
+## Known Limitations
 
-2. **Anomaly Detection**
-   - Uses Isolation Forest to identify outliers
-   - Combines ML results with static rules
-   - Applies severity-based alerting
-
-3. **Process Analysis**
-   - Monitors process creation and termination
-   - Tracks resource usage patterns
-   - Checks executable signatures
-   - Monitors network connections
+- May generate false positives during initial learning period
+- Resource intensive during model training
+- Limited to Windows operating systems
+- Requires administrative privileges
+- Experimental machine learning implementation
 
 ## Contributing
 
@@ -126,16 +121,21 @@ Contributions are welcome! Areas for improvement:
 - Process injection detection
 - Memory analysis capabilities
 - Additional ML features
-- Configuration file support
-- Advanced logging options
+- Testing and validation
+- Performance optimization
 
 ## Security Notes
 
-- Requires administrative privileges to monitor system processes
-- Keep baseline data secure to prevent manipulation
-- Regularly update whitelist for your environment
-- Monitor the tool's resource usage on critical systems
+- This is a testing tool - use with caution
+- Requires administrative privileges
+- Keep baseline data secure
+- Monitor resource usage
+- Verify results independently
 
 ## License
 
 MIT License - Feel free to use and modify for your needs
+
+## Disclaimer
+
+This software is provided for educational and research purposes only. The authors are not responsible for any damage or misuse of this tool. Always obtain proper authorization before monitoring systems and respect all applicable laws and regulations.
