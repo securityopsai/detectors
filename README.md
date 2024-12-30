@@ -1,164 +1,141 @@
-Process Detector: Unsupervised Anomaly Detection for Windows Processes - ML Experiment not actual production grade tool
+# Windows Process Anomaly Detector
 
-Overview
+A Python-based security tool that uses machine learning and behavioral analysis to detect suspicious processes on Windows systems. This tool combines static rules, process relationship monitoring, and unsupervised machine learning to identify potentially malicious activity.
 
-The Process Detector is a Python-based tool that uses static rules and unsupervised machine learning to detect suspicious processes on Windows systems. By analyzing parent-child relationships, process resource usage, file paths, and network activity, the tool identifies potential threats in real-time.
+## Features
 
-Features
+### Machine Learning Detection
+- Uses Isolation Forest algorithm to detect anomalous process behavior
+- Builds and maintains a baseline of normal process metrics
+- Monitors CPU usage, memory consumption, and disk I/O patterns
 
-Unsupervised Learning:
+### Static Analysis
+- Detects unsigned executables
+- Monitors processes running from suspicious directories (TEMP, APPDATA, Downloads)
+- Tracks network connections and flags suspicious combinations
 
-Dynamically learns normal process behavior and flags anomalies using Isolation Forest.
+### Process Monitoring
+- Real-time monitoring of all system processes
+- Tracks process resource usage
+- Monitors network connectivity per process
+- Built-in whitelist support for common system processes
 
-Parent-Child Monitoring:
+### Alerting
+- Multiple severity levels (INFO, WARNING, ALERT)
+- Detailed logging with process information
+- Cooldown system to prevent alert spam
+- Configurable alert thresholds
 
-Tracks unusual relationships (e.g., winword.exe → cmd.exe).
+## Requirements
 
-Unsigned Executable Detection:
+- Python 3.8+
+- Windows Operating System
+- Required Python packages:
+  ```
+  psutil
+  scikit-learn
+  numpy
+  pefile
+  ```
 
-Flags processes running unsigned executables.
+## Installation
 
-Suspicious Directory Check:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/securityopsai/detectors.git
+   cd detectors
+   ```
 
-Identifies processes running from directories like TEMP, APPDATA, or Downloads.
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Network Monitoring:
+## Usage
 
-Detects processes with active outbound connections.
+Run the detector:
+```bash
+python ProcessAnomalyDetector
+```
 
-Integrated Logging:
+The tool will:
+1. Load or create a baseline of normal process behavior
+2. Start monitoring processes in real-time
+3. Generate alerts for suspicious activity
+4. Log findings to `enhanced_process_monitor_log.txt`
 
-Logs flagged processes with severity levels (INFO, WARNING, ALERT).
+## Configuration
 
-How It Works
-
-Baseline Creation:
-
-Builds a model of normal behavior by analyzing process resource usage and relationships.
-
-Real-Time Monitoring:
-
-Continuously scans processes for anomalies using machine learning and static rules.
-
-Logging:
-
-Records flagged processes with actionable details in a log file.
-
-Installation
-
-Requirements
-
-Python 3.8+
-
-Required Libraries:
-
-psutil
-
-scikit-learn
-
-pefile
-
-pandas
-
-Setup
-
-Clone the repository:
-
-git clone https://github.com/yourusername/process-detector.git
-cd process-detector
-
-Install dependencies:
-
-pip install -r requirements.txt
-
-Run the tool:
-
-python process_detector.py
-
-Usage
-
-Run the Detector
-
-Execute the script:
-
-python process_detector.py
-
-The detector will:
-
-Build a baseline of normal process behavior.
-
-Monitor processes in real-time.
-
-Log anomalies to enhanced_process_monitor_log.txt.
-
-Stop Monitoring
-
-Use Ctrl+C to stop the program.
-
-View Logs
-
-Check the log file for flagged processes:
-
-
-Detection Criteria
-
-Severity
-
-Description
-
-INFO
-
-Signed executables running from suspicious directories.
-
-WARNING
-
-Unsigned executables or abnormal parent-child relationships.
-
-ALERT
-
-Processes with multiple anomalies (e.g., unsigned + shady directory + network activity).
-
-Customization
-
-Whitelist
-
-Add known safe processes to avoid false positives:
-
+### Whitelist
+Edit the WHITELIST variable to add trusted processes:
+```python
 WHITELIST = ['explorer.exe', 'svchost.exe', 'chrome.exe']
+```
 
-Suspicious Directories
-
-Modify the list of directories to monitor:
-
+### Suspicious Directories
+Modify SUSPICIOUS_DIRECTORIES to adjust monitored locations:
+```python
 SUSPICIOUS_DIRECTORIES = ['TEMP', 'APPDATA', 'Downloads']
+```
 
-Logging Cooldown
+### Alert Cooldown
+Adjust the COOLDOWN value (in seconds) to control alert frequency:
+```python
+COOLDOWN = 60  # Seconds between repeated alerts for the same process
+```
 
-Adjust how often the same process can be logged:
+## Alert Severity Levels
 
-COOLDOWN = 60  # Seconds
+- **INFO**: Minor concerns (e.g., signed executable in suspicious directory)
+- **WARNING**: Moderate concerns (e.g., unsigned executable or suspicious parent-child relationship)
+- **ALERT**: Major concerns (multiple suspicious indicators or severe anomalies)
 
-How It Learns
+## Logging
 
-The tool collects metrics like CPU usage, memory, disk I/O, and parent-child relationships for all processes.
+The tool logs all findings to `enhanced_process_monitor_log.txt` with the following format:
+```
+YYYY-MM-DD HH:MM:SS [SEVERITY] - Message
+```
 
-It trains an Isolation Forest model to identify outliers in this data.
+Example:
+```
+2024-12-30 10:15:23 [ALERT] - Unsigned, shady directory, and network: suspicious.exe (PID 1234), Path: C:\Users\...\AppData\Local\Temp\suspicious.exe
+```
 
-Any process deviating significantly from the baseline is flagged as anomalous.
+## How It Works
 
-Roadmap
+1. **Baseline Creation**
+   - Collects metrics from running processes
+   - Builds a statistical model of normal behavior
+   - Continuously updates baseline data
 
-Add detection for injected DLLs.
+2. **Anomaly Detection**
+   - Uses Isolation Forest to identify outliers
+   - Combines ML results with static rules
+   - Applies severity-based alerting
 
-Integrate with Windows Event Logs for process creation monitoring.
+3. **Process Analysis**
+   - Monitors process creation and termination
+   - Tracks resource usage patterns
+   - Checks executable signatures
+   - Monitors network connections
 
-Implement process runtime analysis for long-running scripts.
+## Contributing
 
-Contributing
+Contributions are welcome! Areas for improvement:
+- Process injection detection
+- Memory analysis capabilities
+- Additional ML features
+- Configuration file support
+- Advanced logging options
 
-Feel free to submit issues or pull requests to enhance the functionality of the Process Detector.
+## Security Notes
 
-License
+- Requires administrative privileges to monitor system processes
+- Keep baseline data secure to prevent manipulation
+- Regularly update whitelist for your environment
+- Monitor the tool's resource usage on critical systems
 
-This project is licensed under the MIT License.
+## License
 
+MIT License - Feel free to use and modify for your needs
